@@ -19,7 +19,7 @@ inline vector<string> split(const string &s, char delim) {
     return split(s, delim, elems);
 }
 
-uint32_t cmdParser(vector<string> args, string &host, string &port, string &user, string &pass, bool &debug, vector<int32_t> &devices) {
+uint32_t cmdParser(vector<string> args, string &host, string &port, string &user, string &pass, string &graffiti, bool &debug, vector<int32_t> &devices) {
 	bool hostSet = false;
 	bool apiSet = false;
 
@@ -60,6 +60,19 @@ uint32_t cmdParser(vector<string> args, string &host, string &port, string &user
 					continue;
 				}
 			}
+			
+			if (args[i].compare("--graffiti")  == 0) {
+				if (i+1 < args.size()) {
+					graffiti = args[i+1];
+					i++;
+					
+					// Truncate if too long
+					if (graffiti.length() > 32) {
+						graffiti = graffiti.substr(0,32);	
+					}
+					continue;
+				}
+			}
 
 			if (args[i].compare("--devices")  == 0) {
 				if (i+1 < args.size()) {
@@ -70,7 +83,7 @@ uint32_t cmdParser(vector<string> args, string &host, string &port, string &user
 					continue;
 				}
 			}
-
+			
 			if (args[i].compare("--debug")  == 0) {
 				debug = true;
 			}
@@ -101,11 +114,12 @@ int main(int argc, char* argv[]) {
 	string port;
 	string user;
 	string pass;
+	string graffiti;
 
 	bool debug = false;
 	vector<int32_t> devices;
 
-	uint32_t parsing = cmdParser(cmdLineArgs, host, port, user, pass, debug, devices);
+	uint32_t parsing = cmdParser(cmdLineArgs, host, port, user, pass, graffiti, debug, devices);
 
 	cout << "-====================================-" << endl;
 	cout << "         FishHash OpenCL Miner        " << endl;
@@ -127,10 +141,11 @@ int main(int argc, char* argv[]) {
 		cout << " --pass <password>		A password for pool login if required (optional)" << endl;
 		cout << " --devices <numbers>		A comma seperated list of devices that should be used for mining (default: all in system)" << endl; 
 		cout << " --version			Prints the version number" << endl;
+		cout << " --graffiti			Entering a custom graffiti for found shares" << endl;
 		exit(0);
 	}
 
-	fishHashMiner::ironFishStratum myStratum(host, port, user, pass, debug);
+	fishHashMiner::ironFishStratum myStratum(host, port, user, pass, graffiti, debug);
 	fishHashMiner::clHost myClHost;
 	
 	cout << endl;

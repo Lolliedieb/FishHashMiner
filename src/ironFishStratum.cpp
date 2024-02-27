@@ -193,9 +193,16 @@ void ironFishStratum::readStratum(const boost::system::error_code& err) {
 				int exists = jsonTree.count("body");
 				if (exists > 0) {					
 			    		work.workId = jsonTree.get<string>("body.miningRequestId");   
-			    		work.header = parseHex(jsonTree.get<string>("body.header") + "000000000000000000000000");	// Expect 180 bytes in - that we pad to 192 (=3*64) bytes for Blake3 in the kernel code
+			    		
+			    		// Expect 180 bytes in - that we pad to 192 (=3*64) bytes for Blake3 in the kernel code
+			    		work.header = parseHex(jsonTree.get<string>("body.header") + "000000000000000000000000");	
 			    		
 			    		cout << "New job with id " << work.workId << " received" << endl;
+			    		
+			    		//Here we modify the 32 bytes of the graffiti if the user did set it
+			    		for (uint32_t i=0; i<graffiti.size(); i++) {
+			    			work.header[i] = graffiti[i];
+			    		}			    		
 			    	}
 			}
 
@@ -269,8 +276,9 @@ workDescription ironFishStratum::getWork(uint64_t neededNonces) {
 // Will be called by clHost class for check & submit
 void ironFishStratum::handleSolution(workDescription wd, uint64_t nonce) {
 
-	// With the future block header format this might need an amendment to the right position
-	((uint64_t *) wd.header.data())[0] = nonce;	
+	// Note that on the new block header format the nonce position is only 4 bytes aligned, but 8 bytes in size
+	((uint32_t *) wd.header.data())[43] = ((uint32_t *) &nonce)[0];
+	((uint32_t *) wd.header.data())[44] = ((uint32_t *) &nonce)[1];	
 	
 	// We perform a CPU check to see the hash validity
 	vector<uint8_t> cpuHash;
@@ -289,12 +297,12 @@ void ironFishStratum::handleSolution(workDescription wd, uint64_t nonce) {
 	if (hashValue <= wd.target) {
 		std::stringstream nonceStr;
 		for (int32_t i=0; i<8; i++) {
-			nonceStr << std::setfill('0') << std::setw(2) << std::hex << (unsigned) wd.header[i];
+			nonceStr << std::setfill('0') << std::setw(2) << std::hex << (unsigned) wd.header[172+i];
 		}
 		
 		std::stringstream graffitiStr;
 		for (int32_t i=0; i<32; i++) {
-			graffitiStr << std::setfill('0') << std::setw(2) << std::hex << (unsigned) wd.header[148+i];
+			graffitiStr << std::setfill('0') << std::setw(2) << std::hex << (unsigned) wd.header[i];
 		}
 		
 		std::stringstream json;
@@ -304,13 +312,14 @@ void ironFishStratum::handleSolution(workDescription wd, uint64_t nonce) {
 }
 
 
-ironFishStratum::ironFishStratum(string hostIn, string portIn, string userIn, string passIn, bool debugIn) : res(io_service) {
+ironFishStratum::ironFishStratum(string hostIn, string portIn, string userIn, string passIn, string graffitiIn, bool debugIn) : res(io_service) {
 
 	host = hostIn;
 	port = portIn;
 	user = userIn;
 	pass = passIn;
 	debug = debugIn;
+	graffiti = graffitiIn;
 
 	// Set defaults for work
 	work.target = 0;

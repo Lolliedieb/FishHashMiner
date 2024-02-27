@@ -391,13 +391,12 @@ __kernel void mine (	__global uint8 * dag,
 	if (c == 0) {
 	    v.se = (uint) 64;
 	    v.sf = (uint) CHUNK_START;
-	    
-	    // Set the nonce. This might need an adjustment if block header format changes
-	    m.s01 = as_uint2(nonce);	    
 	} else if (c == 1) {
 	    v.se = (uint) 64;
 	    v.sf = 0;
 	} else if (c == 2) {
+	    // Taking care of the new block header format	
+	    m.sbc = as_uint2(nonce);	  
 	    v.se = (uint) 52;
 	    v.sf = (uint) CHUNK_END | ROOT;
 	}
@@ -450,11 +449,7 @@ __kernel void mine (	__global uint8 * dag,
 		uint8 fetch0 = dag[4*p0 + thread_id];
 		uint8 fetch1 = dag[4*p1 + thread_id];
 		uint8 fetch2 = dag[4*p2 + thread_id];
-		
-		//if ((gid == 0) && (tid == 0)) {
-		//	printf("Index GPU: %d %d %x \n", a, p0, fetch0.s0);
-		//}
-		
+				
 		fetch1 = fnv(mix, fetch1);
 		fetch2 = mix ^ fetch2;
 		

@@ -40,7 +40,7 @@ struct workDescription {
 
 class ironFishStratum {
 	public:
-	ironFishStratum(string, string, string, string, bool);
+	ironFishStratum(string, string, string, string, string, bool);
 	void startWorking();
 
 	bool hasWork();
@@ -61,6 +61,7 @@ class ironFishStratum {
 	string port;
 	string user;
 	string pass;
+	string graffiti;
 	bool debug = false;
 
 	// Storage for received work
@@ -87,11 +88,7 @@ class ironFishStratum {
 
 	// Connection handling
 	void connect();
-	void handleConnect(const boost::system::error_code& err,  tcp::resolver::iterator);
-
-	// Solution Check & Submit
-	//bool testSolution(const vector<uint32_t>&, workDescription&, vector<uint8_t>&, vector<uint8_t>&);
-	//void submitSolution(vector<uint8_t>, vector<uint8_t>);	
+	void handleConnect(const boost::system::error_code& err,  tcp::resolver::iterator);	
 };
 
 // A helper function to parse the json tree more efficiently
