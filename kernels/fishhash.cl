@@ -436,15 +436,15 @@ __kernel void mine (	__global uint8 * dag,
                        
             	barrier(CLK_LOCAL_MEM_FENCE);
             
-            	// Share mix.s0 and mix.s4 for the address calculation
-            	share->uint2s[thread_id] = (uint2) (mix.s0, mix.s4);
+            	// Share mix groups for the change to cover audit comments
+            	share->uint2s[thread_id] = (uint2) (mix.s0^mix.s1^mix.s2^mix.s3, mix.s4^mix.s5^mix.s6^mix.s7);
             	
             	barrier(CLK_LOCAL_MEM_FENCE);
             	
             	// FishHash address calculation
-            	uint p0 = share->uints[0] % dagSize;
-		uint p1 = share->uints[1] % dagSize;
-		uint p2 = share->uints[2] % dagSize;
+            	uint p0 = (share->uints[0] ^ share->uints[3] ^ share->uints[6]) % dagSize;
+		uint p1 = (share->uints[1] ^ share->uints[4] ^ share->uints[7]) % dagSize;
+		uint p2 = (share->uints[2] ^ share->uints[5] ^ a) % dagSize;
 				
 		uint8 fetch0 = dag[4*p0 + thread_id];
 		uint8 fetch1 = dag[4*p1 + thread_id];
