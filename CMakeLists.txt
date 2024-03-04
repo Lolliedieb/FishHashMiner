@@ -46,9 +46,11 @@ else()
     message(FATAL_ERROR "error, OpenSSL not found, please install: 'apt-get install libssl-dev' on Ubuntu")
 endif()
 
-find_package(OpenCLHeaders REQUIRED)
-find_package(OpenCLICDLoader REQUIRED)
-find_package(OpenCLHeadersCpp REQUIRED)
+#find_package(OpenCLHeaders REQUIRED)
+#find_package(OpenCLICDLoader REQUIRED)
+#find_package(OpenCLHeadersCpp REQUIRED)
+
+find_package(OpenCL REQUIRED)
 
 # Miner Sources & Headers
 set (HEADERS
@@ -72,7 +74,8 @@ target_compile_options(${TARGET_NAME} PRIVATE -Werror -Wall -Wextra)
 
 
 # Linking packages
-target_link_libraries(${TARGET_NAME} OpenCL::Headers OpenCL::OpenCL OpenCL::HeadersCpp)
+#target_link_libraries(${TARGET_NAME} OpenCL::Headers OpenCL::OpenCL OpenCL::HeadersCpp)
+target_link_libraries(${TARGET_NAME} OpenCL::OpenCL)
 target_link_libraries(${TARGET_NAME} FishHash)
 
 if(MSVC)
@@ -86,7 +89,7 @@ if(UNIX)
 	target_link_libraries(${TARGET_NAME}  -ldl)
 endif()
 
-target_link_libraries(${TARGET_NAME} ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${Boost_LIBRARIES})
+target_link_libraries(${TARGET_NAME} ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${Boost_LIBRARIES} OpenCL::OpenCL)
 
 if(UNIX)
     find_package(Threads)
