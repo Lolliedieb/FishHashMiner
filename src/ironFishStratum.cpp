@@ -93,7 +93,7 @@ void ironFishStratum::handleConnect(const boost::system::error_code& err, tcp::r
 
 		// The connection was successful. Send the subscribe request
 		std::stringstream json;
-		json << "{\"id\":0,\"method\":\"mining.subscribe\",\"body\":{\"version\":2,\"agent\":\"fishHash reference miner\",\"publicAddress\":\"" << user << "\",\"extend\":[\"mining.submitted\"]}}\n";
+		json << "{\"id\":0,\"method\":\"mining.subscribe\",\"body\":{\"version\":3,\"agent\":\"fishHash reference miner\",\"publicAddress\":\"" << user << "\",\"extend\":[\"mining.submitted\"]}}\n";
 		
 		queueDataSend(json.str());	
 			
@@ -306,7 +306,7 @@ void ironFishStratum::handleSolution(workDescription wd, uint64_t nonce) {
 		}
 		
 		std::stringstream json;
-		json << "{\"id\":1,\"method\":\"mining.submit\",\"body\":{\"miningRequestId\":" << wd.workId << ",\"randomness\":\"" << nonceStr.str() << "\",\"graffiti\":\"" << graffitiStr.str() << "\"}}\n";
+		json << "{\"id\":1,\"method\":\"mining.submit\",\"body\":{\"miningRequestId\":" << wd.workId << ",\"randomness\":\"" << nonceStr.str() << "\"}}\n";
 		queueDataSend(json.str());
 	}	
 }
